@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis 2: Menyiapkan Ladang Bersama</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --hijau:#0d5c32; --hijau2:#1b7a45; --kuning:#ffd95a; --kuning2:#ffe999;
+    --krem:#fff8e6; --coklat:#8a4a1f; --merah:#c8432b; --teks:#1f2a1f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Nunito',sans-serif; color:var(--teks); min-height:100vh;
+    background:linear-gradient(180deg,#78c3f0 0%,#c4e8fb 45%,#9cc983 100%);
+    display:flex; align-items:center; justify-content:center; padding:24px 16px;
+  }
+  .kartu{
+    background:var(--krem); width:100%; max-width:660px; border-radius:26px;
+    border:4px solid var(--hijau); box-shadow:0 10px 0 rgba(13,92,50,.35);
+    padding:28px 24px; position:relative;
+  }
+  .papan{
+    display:inline-block; background:var(--coklat); color:#fff; font-family:'Fredoka';
+    font-weight:600; padding:6px 16px; border-radius:12px; font-size:14px; letter-spacing:.5px;
+  }
+  h1{font-family:'Fredoka'; font-weight:700; color:var(--hijau); font-size:clamp(26px,6vw,36px); line-height:1.15; margin:12px 0 8px}
+  .sub{font-size:16px; line-height:1.6; margin-bottom:18px}
+  .kotak-hijau{background:var(--hijau); color:#fff; border-radius:18px; padding:18px 20px; margin-bottom:18px}
+  .kotak-hijau h3{font-family:'Fredoka'; color:var(--kuning); font-size:19px; margin-bottom:10px}
+  .kotak-hijau ol{padding-left:20px; line-height:1.65; font-size:15px}
+  .kotak-hijau li{margin-bottom:4px}
+  .jenis-soal{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:18px}
+  .jenis-soal span{background:var(--kuning2); border:2px solid var(--coklat); border-radius:12px; padding:6px 12px; font-weight:800; font-size:14px; color:var(--coklat)}
+  label{font-weight:800; display:block; margin-bottom:6px; color:var(--hijau)}
+  input[type=text]{
+    width:100%; padding:13px 15px; font-size:16px; font-family:'Nunito'; border-radius:14px;
+    border:3px solid var(--hijau2); background:#fff; margin-bottom:16px; outline:none;
+  }
+  input[type=text]:focus{border-color:var(--coklat)}
+  .tombol{
+    font-family:'Fredoka'; font-weight:600; font-size:19px; cursor:pointer;
+    background:var(--kuning); color:var(--hijau); padding:13px 28px; border-radius:16px;
+    border:3px solid var(--hijau); box-shadow:0 5px 0 var(--hijau); transition:transform .1s, box-shadow .1s;
+  }
+  .tombol:active{transform:translateY(4px); box-shadow:0 1px 0 var(--hijau)}
+  .tombol:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:0 5px 0 var(--hijau)}
+  .tombol.hijau{background:var(--hijau2); color:#fff}
+  .tengah{text-align:center}
+  .peringatan{color:var(--merah); font-weight:700; font-size:14px; margin:-8px 0 12px; display:none}
+
+  .atas{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+  .nomor{font-family:'Fredoka'; font-weight:600; color:var(--hijau); font-size:17px}
+  .skor{background:var(--kuning); border:2px solid var(--hijau); border-radius:12px; padding:4px 12px; font-weight:800; font-size:14px; color:var(--hijau)}
+  .bar{height:14px; background:#e7dcc0; border-radius:10px; overflow:hidden; margin-bottom:14px; border:2px solid var(--hijau)}
+  .isi-bar{height:100%; background:linear-gradient(90deg,var(--hijau2),#5fb85a); width:0; transition:width .4s}
+  .label-jenis{display:inline-block; font-size:13px; font-weight:800; padding:4px 12px; border-radius:20px; margin-bottom:12px; color:#fff}
+  .label-jenis.pg{background:var(--hijau2)}
+  .label-jenis.urut{background:var(--coklat)}
+  .situasi{
+    background:var(--kuning2); border-left:6px solid var(--coklat); border-radius:12px;
+    padding:12px 14px; font-style:italic; font-size:15px; line-height:1.6; margin-bottom:14px;
+  }
+  .tanya{font-weight:800; font-size:18px; line-height:1.5; margin-bottom:14px}
+  .bantuan{font-size:14px; font-weight:700; color:var(--coklat); margin-bottom:12px}
+  .pilihan{display:flex; flex-direction:column; gap:10px; margin-bottom:16px}
+
+  /* Pilihan ganda */
+  .opsi{
+    display:flex; align-items:center; gap:12px; text-align:left; width:100%;
+    background:#fff; border:3px solid #d6c79c; border-radius:16px; padding:12px 14px;
+    font-family:'Nunito'; font-size:16px; font-weight:700; color:var(--teks); cursor:pointer; transition:all .15s;
+  }
+  .opsi:hover:not(:disabled){border-color:var(--hijau2); background:#f1fbef}
+  .huruf{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--hijau);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Fredoka'; font-size:17px;
+  }
+  .opsi.dipilih{border-color:var(--coklat); background:#fff1d1}
+  .opsi.dipilih .huruf{background:var(--coklat)}
+  .opsi.benar, .kartu-urut.benar{border-color:#2e9e4a; border-style:solid; background:#dff5e3}
+  .opsi.benar .huruf, .kartu-urut.benar .huruf{background:#2e9e4a}
+  .opsi.salah, .kartu-urut.salah{border-color:var(--merah); border-style:solid; background:#fde3dd}
+  .opsi.salah .huruf, .kartu-urut.salah .huruf{background:var(--merah)}
+  .opsi:disabled{cursor:default}
+
+  /* Seret dan urutkan */
+  .susun{list-style:none; display:flex; flex-direction:column; gap:10px}
+  .kartu-urut{
+    display:flex; align-items:center; gap:12px; background:#fff; border:3px dashed #c9a96a;
+    border-radius:16px; padding:12px 14px; font-size:16px; font-weight:700; line-height:1.4;
+    cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; transition:box-shadow .15s, background .15s;
+  }
+  .kartu-urut .huruf{background:var(--coklat)}
+  .kartu-urut .pegang{margin-left:auto; flex-shrink:0; color:#b08a52; font-size:22px; line-height:1}
+  .kartu-urut.diseret{
+    border-style:solid; border-color:var(--hijau2); background:#f1fbef; cursor:grabbing;
+    box-shadow:0 10px 20px rgba(0,0,0,.18); transform:scale(1.02); position:relative; z-index:2;
+  }
+  .susun.terkunci .kartu-urut{cursor:default}
+  .susun.terkunci .pegang{visibility:hidden}
+
+  .umpan{display:none; border-radius:16px; padding:14px 16px; margin-bottom:16px; font-size:15px; line-height:1.6}
+  .umpan.ok{background:#dff5e3; border:2px solid #2e9e4a}
+  .umpan.no{background:#fde3dd; border:2px solid var(--merah)}
+  .umpan b{font-family:'Fredoka'; font-size:17px; display:block; margin-bottom:4px}
+  .umpan ol{padding-left:22px; margin:6px 0 8px; font-weight:700}
+
+  .hasil-emoji{font-size:64px}
+  .nilai{font-family:'Fredoka'; font-size:64px; color:var(--hijau); line-height:1}
+  .ringkas{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:18px 0}
+  .bulat{border-radius:12px; padding:8px 0; font-weight:800; font-size:14px; color:#fff}
+  .bulat.b{background:#2e9e4a} .bulat.s{background:var(--merah)}
+  .pesan{background:var(--hijau); color:#fff; border-radius:16px; padding:16px; line-height:1.6; margin:16px 0 20px; text-align:left}
+  .sembunyi{display:none}
+  @media (max-width:420px){ .kartu{padding:22px 16px} .tanya{font-size:16.5px} .opsi, .kartu-urut{font-size:15px} }
+</style>
+</head>
+<body>
+<div class="kartu">
+
+  <!-- LAYAR AWAL -->
+  <section id="layarAwal">
+    <span class="papan">🌾 POS 2 · BAGIAN 2</span>
+    <h1>Kuis 2: Menyiapkan Ladang Bersama</h1>
+    <p class="sub">Warga sudah berkumpul di ladang dan Jagau serta Bawi siap bekerja. Sekarang giliranmu menunjukkan seberapa paham kamu tentang Handep, tugal, dan tahapan menyiapkan ladang sebelum Manugal dimulai.</p>
+
+    <div class="jenis-soal">
+      <span>🔘 7 soal pilihan ganda</span>
+      <span>✋ 3 soal seret dan urutkan</span>
+    </div>
+
+    <div class="kotak-hijau">
+      <h3>Petunjuk Mengerjakan</h3>
+      <ol>
+        <li>Tulis nama dan kelasmu, lalu tekan tombol <b>Mulai Kuis</b>.</li>
+        <li>Untuk soal <b>pilihan ganda</b>, pilih satu jawaban yang paling tepat.</li>
+        <li>Untuk soal <b>seret dan urutkan</b>, tahan sebuah kartu lalu geser ke atas atau ke bawah sampai urutannya benar. Kartu paling atas adalah langkah pertama.</li>
+        <li>Tekan <b>Periksa Jawaban</b>, baca pembahasannya, lalu tekan <b>Soal Berikutnya</b>.</li>
+        <li>Jawaban yang sudah diperiksa tidak bisa diganti, jadi pikirkan baik baik ya.</li>
+      </ol>
+    </div>
+
+    <label for="nama">Nama dan Kelas</label>
+    <input type="text" id="nama" placeholder="Contoh: Bawi, Kelas VI A" autocomplete="off">
+    <p class="peringatan" id="peringatan">Isi nama dan kelasmu dulu ya, Penjelajah!</p>
+    <div class="tengah"><button class="tombol" id="btnMulai">Mulai Kuis ▶</button></div>
+  </section>
+
+  <!-- LAYAR SOAL -->
+  <section id="layarSoal" class="sembunyi">
+    <div class="atas">
+      <span class="nomor" id="nomor">Soal 1 dari 10</span>
+      <span class="skor" id="skor">⭐ Skor: 0</span>
+    </div>
+    <div class="bar"><div class="isi-bar" id="isiBar"></div></div>
+    <span class="label-jenis" id="labelJenis"></span>
+    <div class="situasi sembunyi" id="situasi"></div>
+    <p class="tanya" id="tanya"></p>
+    <p class="bantuan sembunyi" id="bantuan">☝️ Tahan kartu, lalu geser ke atas atau ke bawah. Kartu paling atas adalah langkah pertama.</p>
+    <div class="pilihan" id="pilihan"></div>
+    <div class="umpan" id="umpan"></div>
+    <div class="tengah">
+      <button class="tombol" id="btnPeriksa" disabled>Periksa Jawaban</button>
+      <button class="tombol hijau sembunyi" id="btnLanjut">Soal Berikutnya ▶</button>
+    </div>
+  </section>
+
+  <!-- LAYAR HASIL -->
+  <section id="layarHasil" class="sembunyi tengah">
+    <div class="hasil-emoji" id="hasilEmoji">🏆</div>
+    <h1 id="hasilJudul">Kuis Selesai!</h1>
+    <p class="sub" id="hasilNama"></p>
+    <div class="nilai" id="nilai">0</div>
+    <p style="font-weight:800;margin-top:6px" id="jumlahBenar"></p>
+    <div class="ringkas" id="ringkas"></div>
+    <div class="pesan" id="pesan"></div>
+    <button class="tombol" id="btnUlang">🔄 Ulangi Kuis</button>
+  </section>
+
+</div>
+
+<script>
+/* tipe "pg"   : pilihan ganda, "benar" = indeks jawaban benar
+   tipe "urut" : seret dan urutkan, "item" ditulis dalam URUTAN YANG BENAR (diacak otomatis) */
+const bankSoal = [
+  {
+    tipe: "pg",
+    situasi: "Keesokan paginya, warga berdatangan ke ladang. Ada yang membawa tugal, ada yang membawa benih padi, sementara yang lain membantu membersihkan lahan. Semua bekerja bersama dengan penuh semangat.",
+    tanya: "Masyarakat Dayak menyebut semangat bekerja bersama seperti dalam cerita itu dengan nama...",
+    pilihan: ["Handep", "Manugal", "Tugal", "Mangakal"],
+    benar: 0,
+    bahas: "Handep adalah tradisi saling membantu atau bergotong royong dalam kehidupan masyarakat Dayak."
+  },
+  {
+    tipe: "pg",
+    tanya: "Apa kegunaan tugal dalam kegiatan berladang?",
+    pilihan: ["Untuk menebang pohon besar", "Untuk membuat lubang tempat benih padi ditanam", "Untuk membakar sisa batang kayu", "Untuk mengangkut benih padi"],
+    benar: 1,
+    bahas: "Tugal adalah alat dari kayu yang dipakai untuk membuat lubang tempat benih padi ditanam."
+  },
+  {
+    tipe: "urut",
+    tanya: "Urutkan tahapan menyiapkan ladang sebelum Manugal dimulai!",
+    item: [
+      "Meneweng: menebang pohon, semak, dan rerumputan",
+      "Manyeha: mengumpulkan lalu membakar batang dan rerumputan secara terkendali",
+      "Mangakal: membersihkan kembali bagian lahan yang belum rapi"
+    ],
+    bahas: "Lahan ditebang dulu, lalu hasil tebangan dibakar, dan terakhir dirapikan kembali supaya siap ditanami."
+  },
+  {
+    tipe: "pg",
+    tanya: "Panjang sebuah tugal adalah 1,5 meter. Berapa panjang tugal itu jika ditulis dalam sentimeter?",
+    pilihan: ["15 cm", "105 cm", "150 cm", "1.500 cm"],
+    benar: 2,
+    bahas: "1 meter sama dengan 100 cm. Jadi 1,5 meter = 1,5 × 100 = 150 cm."
+  },
+  {
+    tipe: "pg",
+    tanya: "Mengapa tahap Mangakal masih perlu dilakukan setelah Manyeha?",
+    pilihan: ["Karena benih padi harus ditanam dua kali", "Karena lahan perlu dibakar sekali lagi", "Karena kadang masih ada batang kayu besar atau sisa yang mengganggu lahan", "Karena rumput harus ditanam kembali"],
+    benar: 2,
+    bahas: "Setelah Manyeha, kadang masih tersisa batang kayu besar atau sisa lain. Mangakal membersihkan bagian yang belum rapi itu agar lahan siap ditanami."
+  },
+  {
+    tipe: "urut",
+    tanya: "Urutkan peristiwa dalam cerita Jagau dan Bawi berikut sesuai alur ceritanya!",
+    item: [
+      "Masyarakat sepakat bahwa waktu Manugal sudah tiba",
+      "Keesokan paginya, warga mulai berdatangan ke ladang",
+      "Warga bekerja bersama menyiapkan ladang dengan semangat Handep",
+      "Ladang siap dan benih padi bisa segera ditanam"
+    ],
+    bahas: "Semua dimulai dari kesepakatan warga bahwa waktunya sudah tepat. Setelah itu warga datang, bekerja bersama, dan akhirnya ladang siap untuk Manugal."
+  },
+  {
+    tipe: "pg",
+    situasi: "Seorang warga mengusulkan agar lahan langsung dibakar saja, padahal pohon dan semaknya belum ditebang.",
+    tanya: "Menurutmu, apa yang mungkin terjadi jika usul itu dijalankan?",
+    pilihan: ["Pekerjaan jadi lebih cepat dan hasilnya sama baiknya", "Hasilnya kurang baik karena pohon dan semak belum ditebang dan dikumpulkan", "Benih padi bisa langsung ditanam keesokan harinya", "Tahap Mangakal tidak perlu dilakukan lagi"],
+    benar: 1,
+    bahas: "Ingat tips literasi: kalau urutannya berubah, hasil pekerjaan bisa kurang baik. Pohon dan semak harus ditebang dan dikumpulkan dulu sebelum dibakar."
+  },
+  {
+    tipe: "urut",
+    tanya: "Urutkan langkah kerja warga di ladang berikut dari yang pertama sampai yang terakhir!",
+    item: [
+      "Menebang pohon, semak, dan rerumputan di lahan",
+      "Mengumpulkan batang pohon dan rerumputan yang sudah ditebang",
+      "Membakar tumpukan batang dan rerumputan secara terkendali",
+      "Membersihkan sisa batang kayu besar yang masih mengganggu",
+      "Lahan siap dipakai untuk Manugal"
+    ],
+    bahas: "Langkah pertama dan kedua termasuk Meneweng dan persiapan Manyeha, langkah ketiga adalah Manyeha, dan langkah keempat adalah Mangakal. Setelah semuanya selesai, lahan siap ditugal."
+  },
+  {
+    tipe: "pg",
+    tanya: "Sebanyak 24 warga datang untuk Handep. Ladang dibagi menjadi 4 petak dan setiap petak dikerjakan oleh jumlah warga yang sama. Berapa warga yang bekerja di setiap petak?",
+    pilihan: ["4 orang", "6 orang", "8 orang", "20 orang"],
+    benar: 1,
+    bahas: "24 warga dibagi rata ke 4 petak, jadi 24 : 4 = 6 orang di setiap petak."
+  },
+  {
+    tipe: "pg",
+    tanya: "Jika dikerjakan sendirian, Pak Damang butuh 12 hari untuk membersihkan ladangnya. Dengan Handep, ia dibantu 3 tetangga sehingga ada 4 orang yang bekerja sama cepatnya. Berapa hari pekerjaan itu selesai?",
+    pilihan: ["3 hari", "4 hari", "8 hari", "48 hari"],
+    benar: 0,
+    bahas: "Pekerjaan 12 hari dibagi 4 orang, jadi 12 : 4 = 3 hari. Inilah bukti bahwa dengan Handep pekerjaan berat jadi lebih ringan."
+  }
+];
+
+const huruf = ["A","B","C","D"];
+let urutan = [], indeks = 0, skor = 0, pilihanUser = null, catatan = [], namaSiswa = "";
+let kartuDiseret = null;
+
+const $ = id => document.getElementById(id);
+
+function acak(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function acakBeda(arr){
+  let a;
+  do { a = acak(arr); } while (a.every((x,i) => x === arr[i]));
+  return a;
+}
+
+function tampil(layar){
+  ["layarAwal","layarSoal","layarHasil"].forEach(id => $(id).classList.add("sembunyi"));
+  $(layar).classList.remove("sembunyi");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+$("btnMulai").onclick = () => {
+  namaSiswa = $("nama").value.trim();
+  if(!namaSiswa){ $("peringatan").style.display="block"; $("nama").focus(); return; }
+  $("peringatan").style.display="none";
+  mulai();
+};
+$("nama").addEventListener("keydown", e => { if(e.key==="Enter") $("btnMulai").click(); });
+
+function mulai(){
+  indeks = 0; skor = 0; catatan = [];
+  urutan = bankSoal.map(s => {
+    if(s.tipe === "urut") return {...s, susunanAwal: acakBeda(s.item)};
+    return {...s, opsi: acak(s.pilihan.map((teks,i) => ({teks, benar:i===s.benar})))};
+  });
+  tampil("layarSoal");
+  muatSoal();
+}
+
+function muatSoal(){
+  const s = urutan[indeks];
+  pilihanUser = null;
+  $("nomor").textContent = `Soal ${indeks+1} dari ${urutan.length}`;
+  $("skor").textContent = `⭐ Skor: ${hitungNilai()}`;
+  $("isiBar").style.width = `${(indeks/urutan.length)*100}%`;
+
+  const label = $("labelJenis");
+  label.className = "label-jenis " + s.tipe;
+  label.textContent = s.tipe === "urut" ? "✋ Seret dan Urutkan" : "🔘 Pilihan Ganda";
+
+  if(s.situasi){ $("situasi").textContent = "📖 " + s.situasi; $("situasi").classList.remove("sembunyi"); }
+  else $("situasi").classList.add("sembunyi");
+  $("tanya").textContent = s.tanya;
+  $("pilihan").innerHTML = "";
+  $("umpan").style.display = "none";
+  $("btnPeriksa").classList.remove("sembunyi");
+  $("btnLanjut").classList.add("sembunyi");
+
+  if(s.tipe === "urut"){
+    $("bantuan").classList.remove("sembunyi");
+    buatSoalUrut(s);
+    $("btnPeriksa").disabled = false;
+  } else {
+    $("bantuan").classList.add("sembunyi");
+    buatSoalPG(s);
+    $("btnPeriksa").disabled = true;
+  }
+}
+
+/* ---------- Pilihan ganda ---------- */
+function buatSoalPG(s){
+  s.opsi.forEach((o,i) => {
+    const b = document.createElement("button");
+    b.className = "opsi";
+    b.innerHTML = `<span class="huruf">${huruf[i]}</span><span>${o.teks}</span>`;
+    b.onclick = () => {
+      document.querySelectorAll(".opsi").forEach(x => x.classList.remove("dipilih"));
+      b.classList.add("dipilih");
+      pilihanUser = i;
+      $("btnPeriksa").disabled = false;
+    };
+    $("pilihan").appendChild(b);
+  });
+}
+
+/* ---------- Seret dan urutkan ---------- */
+function buatSoalUrut(s){
+  const ul = document.createElement("ul");
+  ul.className = "susun";
+  ul.id = "susun";
+  s.susunanAwal.forEach(teks => {
+    const li = document.createElement("li");
+    li.className = "kartu-urut";
+    li.dataset.teks = teks;
+    li.innerHTML = `<span class="huruf"></span><span class="isi"></span><span class="pegang">⠿</span>`;
+    li.querySelector(".isi").textContent = teks;
+    li.addEventListener("pointerdown", mulaiSeret);
+    ul.appendChild(li);
+  });
+  $("pilihan").appendChild(ul);
+  perbaruiNomor();
+}
+
+function perbaruiNomor(){
+  document.querySelectorAll("#susun .kartu-urut").forEach((li,i) => li.querySelector(".huruf").textContent = i+1);
+}
+
+function mulaiSeret(e){
+  if($("susun").classList.contains("terkunci")) return;
+  e.preventDefault();
+  kartuDiseret = e.currentTarget;
+  kartuDiseret.setPointerCapture(e.pointerId);
+  kartuDiseret.classList.add("diseret");
+  kartuDiseret.addEventListener("pointermove", geserKartu);
+  kartuDiseret.addEventListener("pointerup", lepasKartu);
+  kartuDiseret.addEventListener("pointercancel", lepasKartu);
+}
+
+function geserKartu(e){
+  if(!kartuDiseret) return;
+  const daftar = $("susun");
+  const lainnya = [...daftar.children].filter(x => x !== kartuDiseret);
+  let sebelum = null;
+  for(const x of lainnya){
+    const r = x.getBoundingClientRect();
+    if(e.clientY < r.top + r.height/2){ sebelum = x; break; }
+  }
+  if(sebelum){
+    if(kartuDiseret.nextElementSibling !== sebelum) daftar.insertBefore(kartuDiseret, sebelum);
+  } else if(daftar.lastElementChild !== kartuDiseret){
+    daftar.appendChild(kartuDiseret);
+  }
+  perbaruiNomor();
+}
+
+function lepasKartu(e){
+  if(!kartuDiseret) return;
+  kartuDiseret.classList.remove("diseret");
+  kartuDiseret.removeEventListener("pointermove", geserKartu);
+  kartuDiseret.removeEventListener("pointerup", lepasKartu);
+  kartuDiseret.removeEventListener("pointercancel", lepasKartu);
+  try{ kartuDiseret.releasePointerCapture(e.pointerId); }catch(err){}
+  kartuDiseret = null;
+}
+
+/* ---------- Periksa jawaban ---------- */
+$("btnPeriksa").onclick = () => {
+  const s = urutan[indeks];
+  let tepat;
+
+  if(s.tipe === "urut"){
+    const daftar = $("susun");
+    daftar.classList.add("terkunci");
+    const kartu = [...daftar.children];
+    tepat = kartu.every((li,i) => li.dataset.teks === s.item[i]);
+    kartu.forEach((li,i) => li.classList.add(li.dataset.teks === s.item[i] ? "benar" : "salah"));
+    const urutanBenar = "<ol>" + s.item.map(t => `<li>${t}</li>`).join("") + "</ol>";
+    tampilUmpan(tepat, (tepat ? "" : "Urutan yang benar adalah:" + urutanBenar) + s.bahas);
+  } else {
+    if(pilihanUser===null) return;
+    tepat = s.opsi[pilihanUser].benar;
+    document.querySelectorAll(".opsi").forEach((b,i) => {
+      b.disabled = true;
+      b.classList.remove("dipilih");
+      if(s.opsi[i].benar) b.classList.add("benar");
+      else if(i===pilihanUser) b.classList.add("salah");
+    });
+    tampilUmpan(tepat, s.bahas);
+  }
+
+  if(tepat) skor++;
+  catatan.push(tepat);
+  $("skor").textContent = `⭐ Skor: ${hitungNilai()}`;
+  $("btnPeriksa").classList.add("sembunyi");
+  $("btnLanjut").textContent = indeks === urutan.length-1 ? "Lihat Hasil 🏆" : "Soal Berikutnya ▶";
+  $("btnLanjut").classList.remove("sembunyi");
+};
+
+function tampilUmpan(tepat, isi){
+  const u = $("umpan");
+  u.className = "umpan " + (tepat ? "ok" : "no");
+  u.innerHTML = `<b>${tepat ? "🎉 Tepat sekali!" : "😅 Belum tepat"}</b>${isi}`;
+  u.style.display = "block";
+}
+
+function hitungNilai(){ return Math.round(skor / urutan.length * 100); }
+
+$("btnLanjut").onclick = () => {
+  indeks++;
+  if(indeks < urutan.length) muatSoal();
+  else hasil();
+};
+
+function hasil(){
+  $("isiBar").style.width = "100%";
+  const nilai = hitungNilai();
+  $("nilai").textContent = nilai;
+  $("hasilNama").textContent = `Nilai akhir ${namaSiswa}`;
+  $("jumlahBenar").textContent = `Kamu menjawab benar ${skor} dari ${urutan.length} soal`;
+  $("ringkas").innerHTML = catatan.map((c,i) => `<div class="bulat ${c?'b':'s'}">${i+1} ${c?'✔':'✘'}</div>`).join("");
+  let emoji, judul, pesan;
+  if(nilai >= 80){
+    emoji="🏆"; judul="Penugal Cilik Hebat!";
+    pesan="<b>Jagau:</b> Hebat! Kamu paham betul cara warga menyiapkan ladang dengan semangat Handep. <br><b>Bawi:</b> Ladang sudah siap, ayo lanjut ke Pos 3. Saatnya Manugal!";
+  } else if(nilai >= 60){
+    emoji="🌾"; judul="Bagus, Penjelajah!";
+    pesan="<b>Jagau:</b> Sebagian besar tahapan sudah kamu pahami. <br><b>Bawi:</b> Coba baca lagi bagian Meneweng, Manyeha, dan Mangakal supaya urutannya makin melekat di ingatan.";
+  } else {
+    emoji="🌱"; judul="Ayo Coba Lagi!";
+    pesan="<b>Jagau:</b> Tidak apa apa, setiap penjelajah pernah salah langkah. <br><b>Bawi:</b> Baca ulang bagian Menyiapkan Ladang Bersama pelan pelan, terutama glosarium dan tahapannya, lalu coba kuis ini sekali lagi ya.";
+  }
+  $("hasilEmoji").textContent = emoji;
+  $("hasilJudul").textContent = judul;
+  $("pesan").innerHTML = pesan;
+  tampil("layarHasil");
+}
+
+$("btnUlang").onclick = () => mulai();
+</script>
+</body>
+</html>
