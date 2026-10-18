@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kuis 1: Membaca Tanda Alam</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --hijau:#0d5c32; --hijau2:#1b7a45; --kuning:#ffd95a; --kuning2:#ffe999;
+    --krem:#fff8e6; --coklat:#8a4a1f; --merah:#c8432b; --teks:#1f2a1f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Nunito',sans-serif; color:var(--teks); min-height:100vh;
+    background:linear-gradient(180deg,#78c3f0 0%,#c4e8fb 45%,#9cc983 100%);
+    display:flex; align-items:center; justify-content:center; padding:24px 16px;
+  }
+  .kartu{
+    background:var(--krem); width:100%; max-width:660px; border-radius:26px;
+    border:4px solid var(--hijau); box-shadow:0 10px 0 rgba(13,92,50,.35);
+    padding:28px 24px; position:relative;
+  }
+  .papan{
+    display:inline-block; background:var(--coklat); color:#fff; font-family:'Fredoka';
+    font-weight:600; padding:6px 16px; border-radius:12px; font-size:14px; letter-spacing:.5px;
+  }
+  h1{font-family:'Fredoka'; font-weight:700; color:var(--hijau); font-size:clamp(26px,6vw,36px); line-height:1.15; margin:12px 0 8px}
+  .sub{font-size:16px; line-height:1.6; margin-bottom:18px}
+  .kotak-hijau{
+    background:var(--hijau); color:#fff; border-radius:18px; padding:18px 20px; margin-bottom:18px;
+  }
+  .kotak-hijau h3{font-family:'Fredoka'; color:var(--kuning); font-size:19px; margin-bottom:10px}
+  .kotak-hijau ol{padding-left:20px; line-height:1.65; font-size:15px}
+  .kotak-hijau li{margin-bottom:4px}
+  label{font-weight:800; display:block; margin-bottom:6px; color:var(--hijau)}
+  input[type=text]{
+    width:100%; padding:13px 15px; font-size:16px; font-family:'Nunito'; border-radius:14px;
+    border:3px solid var(--hijau2); background:#fff; margin-bottom:16px; outline:none;
+  }
+  input[type=text]:focus{border-color:var(--coklat)}
+  .tombol{
+    font-family:'Fredoka'; font-weight:600; font-size:19px; border:none; cursor:pointer;
+    background:var(--kuning); color:var(--hijau); padding:13px 28px; border-radius:16px;
+    border:3px solid var(--hijau); box-shadow:0 5px 0 var(--hijau); transition:transform .1s, box-shadow .1s;
+  }
+  .tombol:active{transform:translateY(4px); box-shadow:0 1px 0 var(--hijau)}
+  .tombol:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:0 5px 0 var(--hijau)}
+  .tombol.hijau{background:var(--hijau2); color:#fff}
+  .tengah{text-align:center}
+  .peringatan{color:var(--merah); font-weight:700; font-size:14px; margin:-8px 0 12px; display:none}
+
+  .atas{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px}
+  .nomor{font-family:'Fredoka'; font-weight:600; color:var(--hijau); font-size:17px}
+  .skor{background:var(--kuning); border:2px solid var(--hijau); border-radius:12px; padding:4px 12px; font-weight:800; font-size:14px; color:var(--hijau)}
+  .bar{height:14px; background:#e7dcc0; border-radius:10px; overflow:hidden; margin-bottom:20px; border:2px solid var(--hijau)}
+  .isi-bar{height:100%; background:linear-gradient(90deg,var(--hijau2),#5fb85a); width:0; transition:width .4s}
+  .situasi{
+    background:var(--kuning2); border-left:6px solid var(--coklat); border-radius:12px;
+    padding:12px 14px; font-style:italic; font-size:15px; line-height:1.6; margin-bottom:14px;
+  }
+  .tanya{font-weight:800; font-size:18px; line-height:1.5; margin-bottom:16px}
+  .pilihan{display:flex; flex-direction:column; gap:10px; margin-bottom:16px}
+  .opsi{
+    display:flex; align-items:center; gap:12px; text-align:left; width:100%;
+    background:#fff; border:3px solid #d6c79c; border-radius:16px; padding:12px 14px;
+    font-family:'Nunito'; font-size:16px; font-weight:700; color:var(--teks); cursor:pointer; transition:all .15s;
+  }
+  .opsi:hover:not(:disabled){border-color:var(--hijau2); background:#f1fbef}
+  .huruf{
+    flex-shrink:0; width:34px; height:34px; border-radius:50%; background:var(--hijau);
+    color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Fredoka'; font-size:17px;
+  }
+  .opsi.dipilih{border-color:var(--coklat); background:#fff1d1}
+  .opsi.dipilih .huruf{background:var(--coklat)}
+  .opsi.benar{border-color:#2e9e4a; background:#dff5e3}
+  .opsi.benar .huruf{background:#2e9e4a}
+  .opsi.salah{border-color:var(--merah); background:#fde3dd}
+  .opsi.salah .huruf{background:var(--merah)}
+  .opsi:disabled{cursor:default}
+  .umpan{display:none; border-radius:16px; padding:14px 16px; margin-bottom:16px; font-size:15px; line-height:1.6}
+  .umpan.ok{background:#dff5e3; border:2px solid #2e9e4a}
+  .umpan.no{background:#fde3dd; border:2px solid var(--merah)}
+  .umpan b{font-family:'Fredoka'; font-size:17px; display:block; margin-bottom:4px}
+
+  .hasil-emoji{font-size:64px}
+  .nilai{font-family:'Fredoka'; font-size:64px; color:var(--hijau); line-height:1}
+  .ringkas{display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin:18px 0}
+  .bulat{border-radius:12px; padding:8px 0; font-weight:800; font-size:14px; color:#fff}
+  .bulat.b{background:#2e9e4a} .bulat.s{background:var(--merah)}
+  .pesan{background:var(--hijau); color:#fff; border-radius:16px; padding:16px; line-height:1.6; margin:16px 0 20px; text-align:left}
+  .sembunyi{display:none}
+  @media (max-width:420px){ .kartu{padding:22px 16px} .tanya{font-size:16.5px} .opsi{font-size:15px} }
+</style>
+</head>
+<body>
+<div class="kartu">
+
+  <!-- LAYAR AWAL -->
+  <section id="layarAwal">
+    <span class="papan">🌾 POS 1 · BAGIAN 1</span>
+    <h1>Kuis 1: Membaca Tanda Alam</h1>
+    <p class="sub">Jagau dan Bawi butuh bantuanmu lagi! Kali ini kamu akan menguji seberapa jeli kamu membaca tanda alam yang dipakai leluhur Dayak Katingan sebelum memulai Manugal.</p>
+
+    <div class="kotak-hijau">
+      <h3>Petunjuk Mengerjakan</h3>
+      <ol>
+        <li>Tulis nama dan kelasmu, lalu tekan tombol <b>Mulai Kuis</b>.</li>
+        <li>Ada 10 soal pilihan ganda. Baca soal dan ceritanya dengan teliti.</li>
+        <li>Pilih satu jawaban yang menurutmu paling tepat, lalu tekan <b>Periksa Jawaban</b>.</li>
+        <li>Baca pembahasannya, kemudian tekan <b>Soal Berikutnya</b>.</li>
+        <li>Jawaban yang sudah diperiksa tidak bisa diganti, jadi pikirkan baik baik ya.</li>
+      </ol>
+    </div>
+
+    <label for="nama">Nama dan Kelas</label>
+    <input type="text" id="nama" placeholder="Contoh: Jagau, Kelas VI A" autocomplete="off">
+    <p class="peringatan" id="peringatan">Isi nama dan kelasmu dulu ya, Penjelajah!</p>
+    <div class="tengah"><button class="tombol" id="btnMulai">Mulai Kuis ▶</button></div>
+  </section>
+
+  <!-- LAYAR SOAL -->
+  <section id="layarSoal" class="sembunyi">
+    <div class="atas">
+      <span class="nomor" id="nomor">Soal 1 dari 10</span>
+      <span class="skor" id="skor">⭐ Skor: 0</span>
+    </div>
+    <div class="bar"><div class="isi-bar" id="isiBar"></div></div>
+    <div class="situasi sembunyi" id="situasi"></div>
+    <p class="tanya" id="tanya"></p>
+    <div class="pilihan" id="pilihan"></div>
+    <div class="umpan" id="umpan"></div>
+    <div class="tengah">
+      <button class="tombol" id="btnPeriksa" disabled>Periksa Jawaban</button>
+      <button class="tombol hijau sembunyi" id="btnLanjut">Soal Berikutnya ▶</button>
+    </div>
+  </section>
+
+  <!-- LAYAR HASIL -->
+  <section id="layarHasil" class="sembunyi tengah">
+    <div class="hasil-emoji" id="hasilEmoji">🏆</div>
+    <h1 id="hasilJudul">Kuis Selesai!</h1>
+    <p class="sub" id="hasilNama"></p>
+    <div class="nilai" id="nilai">0</div>
+    <p style="font-weight:800;margin-top:6px" id="jumlahBenar"></p>
+    <div class="ringkas" id="ringkas"></div>
+    <div class="pesan" id="pesan"></div>
+    <button class="tombol" id="btnUlang">🔄 Ulangi Kuis</button>
+  </section>
+
+</div>
+
+<script>
+const bankSoal = [
+  {
+    tanya: "Rasi bintang apa yang menjadi kompas utama masyarakat Dayak Katingan untuk memulai masa tanam?",
+    pilihan: ["Bintang Patendu atau rasi Orion", "Bintang Biduk", "Bintang Pari", "Bintang Kejora"],
+    benar: 0,
+    bahas: "Masyarakat Dayak Katingan memperhatikan kemunculan Bintang Patendu (rasi Orion atau bintang tiga) di posisi tertentu pada malam hari sebagai tanda pergeseran musim."
+  },
+  {
+    tanya: "Ketika daun rumput kalui mulai berubah warna menjadi kemerahan, apa artinya bagi masyarakat?",
+    pilihan: ["Musim hujan sudah datang dan ladang tergenang", "Puncak musim kemarau tiba dan tanah sudah cukup kering", "Padi sudah siap untuk dipanen", "Lahan harus segera ditebang ulang"],
+    benar: 1,
+    bahas: "Rumput kalui yang memerah menjadi penanda alam bahwa puncak kemarau sudah datang dan tanah dalam kondisi kering yang pas setelah lahan dibakar."
+  },
+  {
+    tanya: "Kapan ladang dinyatakan siap untuk ditugal?",
+    pilihan: ["Saat api pembakaran masih menyala besar", "Saat batang pohon baru saja ditebang", "Saat sisa pembakaran sudah dingin sempurna dan abunya tebal serta merata", "Saat rumput kembali tumbuh hijau"],
+    benar: 2,
+    bahas: "Ladang baru siap ditugal kalau sisa pembakaran sudah benar benar dingin dan meninggalkan lapisan abu tebal yang tersebar merata."
+  },
+  {
+    tanya: "Apa gunanya abu sisa pembakaran lahan bagi benih padi?",
+    pilihan: ["Menjadi pupuk alami yang kaya hara", "Mengusir burung pemakan benih", "Membuat tanah menjadi lebih keras", "Menggantikan air hujan"],
+    benar: 0,
+    bahas: "Abu alami dari pembakaran lahan berfungsi sebagai pupuk alami yang kaya hara untuk benih padi yang dimasukkan ke lubang tugal."
+  },
+  {
+    tanya: "Siklus pembacaan tanda alam biasanya jatuh antara bulan Juli hingga November. Jika dihitung dari awal Juli sampai akhir November, berapa bulan lamanya?",
+    pilihan: ["3 bulan", "4 bulan", "5 bulan", "6 bulan"],
+    benar: 2,
+    bahas: "Coba hitung satu per satu: Juli, Agustus, September, Oktober, November. Jumlahnya 5 bulan."
+  },
+  {
+    tanya: "Mengapa ketepatan membaca tanda alam sangat penting dalam Manugal?",
+    pilihan: ["Supaya warga bisa berpesta lebih lama", "Karena padi gunung (padi gogo) sepenuhnya mengandalkan air hujan", "Karena ladang dialiri air sungai setiap hari", "Supaya benih padi cepat dijual ke pasar"],
+    benar: 1,
+    bahas: "Padi gogo adalah padi tadah hujan. Kalau waktu tanamnya meleset, benih bisa kekurangan air karena tidak ada irigasi lain selain hujan."
+  },
+  {
+    tanya: "Lubang hasil manugal sengaja dibiarkan terbuka. Apa alasannya?",
+    pilihan: ["Agar benih mudah diambil kembali", "Agar hewan bisa masuk dan memakan hama", "Agar lubang langsung menampung air saat hujan pertama turun", "Agar petani mudah menghitung jumlah lubang"],
+    benar: 2,
+    bahas: "Lubang tugal dibiarkan terbuka supaya air hujan pertama setelah tanam langsung tertampung dan membasahi benih."
+  },
+  {
+    situasi: "Jagau bertanya, \"Bawi, mengapa ya warga belum juga mulai manugal padahal ladang sudah siap?\"",
+    tanya: "Jawaban apa yang paling tepat untuk pertanyaan Jagau?",
+    pilihan: ["Warga masih menunggu benih padi dibeli dari kota", "Warga harus memastikan waktu tanam sudah tepat dengan memperhatikan tanda alam", "Warga takut bekerja di ladang saat siang hari", "Warga menunggu padi tahun lalu dipanen"],
+    benar: 1,
+    bahas: "Dalam tradisi Manugal, masyarakat tidak langsung menanam padi walaupun ladang terlihat siap. Mereka memastikan dulu waktunya tepat dengan membaca tanda alam."
+  },
+  {
+    situasi: "Dalam perjalanan ke ladang, Jagau melihat air sungai tidak setinggi biasanya. Bawi juga melihat rumput di sekitar ladang mulai menguning, tetapi ia masih belum yakin.",
+    tanya: "Kesimpulan mana yang paling tepat dari cerita tersebut?",
+    pilihan: ["Manugal harus dimulai hari itu juga", "Musim hujan sudah datang", "Tanda kemarau mulai terlihat, tetapi tanda alam lainnya perlu diperiksa dulu", "Ladang belum pernah dibersihkan sama sekali"],
+    benar: 2,
+    bahas: "Sungai yang surut dan rumput yang menguning memang tanda kemarau. Namun, satu atau dua tanda belum cukup. Jagau dan Bawi masih perlu memeriksa bintang, rumput kalui, dan kondisi abu di ladang."
+  },
+  {
+    situasi: "Bintang Patendu sudah terlihat di posisinya dan rumput kalui sudah memerah. Namun, sisa pembakaran di ladang masih berasap dan terasa panas.",
+    tanya: "Apa keputusan yang paling tepat untuk warga?",
+    pilihan: ["Langsung menugal karena dua tanda alam sudah muncul", "Menunggu sampai sisa pembakaran dingin sempurna dan abunya merata", "Membatalkan Manugal tahun ini", "Menyiram ladang dengan air sungai lalu langsung menanam"],
+    benar: 1,
+    bahas: "Semua tanda harus terpenuhi. Selama sisa pembakaran masih panas, ladang belum siap ditugal. Warga cukup menunggu sampai abunya dingin dan tersebar merata."
+  }
+];
+
+const huruf = ["A","B","C","D"];
+let urutan = [], indeks = 0, skor = 0, pilihanUser = null, catatan = [], namaSiswa = "";
+
+const $ = id => document.getElementById(id);
+
+function acak(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function tampil(layar){
+  ["layarAwal","layarSoal","layarHasil"].forEach(id => $(id).classList.add("sembunyi"));
+  $(layar).classList.remove("sembunyi");
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+$("btnMulai").onclick = () => {
+  namaSiswa = $("nama").value.trim();
+  if(!namaSiswa){ $("peringatan").style.display="block"; $("nama").focus(); return; }
+  $("peringatan").style.display="none";
+  mulai();
+};
+$("nama").addEventListener("keydown", e => { if(e.key==="Enter") $("btnMulai").click(); });
+
+function mulai(){
+  indeks = 0; skor = 0; catatan = [];
+  urutan = bankSoal.map(s => {
+    const opsi = acak(s.pilihan.map((teks,i) => ({teks, benar:i===s.benar})));
+    return {...s, opsi};
+  });
+  tampil("layarSoal");
+  muatSoal();
+}
+
+function muatSoal(){
+  const s = urutan[indeks];
+  pilihanUser = null;
+  $("nomor").textContent = `Soal ${indeks+1} dari ${urutan.length}`;
+  $("skor").textContent = `⭐ Skor: ${skor*10}`;
+  $("isiBar").style.width = `${(indeks/urutan.length)*100}%`;
+  if(s.situasi){ $("situasi").textContent = "📖 " + s.situasi; $("situasi").classList.remove("sembunyi"); }
+  else $("situasi").classList.add("sembunyi");
+  $("tanya").textContent = s.tanya;
+  $("pilihan").innerHTML = "";
+  s.opsi.forEach((o,i) => {
+    const b = document.createElement("button");
+    b.className = "opsi";
+    b.innerHTML = `<span class="huruf">${huruf[i]}</span><span>${o.teks}</span>`;
+    b.onclick = () => {
+      document.querySelectorAll(".opsi").forEach(x => x.classList.remove("dipilih"));
+      b.classList.add("dipilih");
+      pilihanUser = i;
+      $("btnPeriksa").disabled = false;
+    };
+    $("pilihan").appendChild(b);
+  });
+  $("umpan").style.display = "none";
+  $("btnPeriksa").disabled = true;
+  $("btnPeriksa").classList.remove("sembunyi");
+  $("btnLanjut").classList.add("sembunyi");
+}
+
+$("btnPeriksa").onclick = () => {
+  if(pilihanUser===null) return;
+  const s = urutan[indeks];
+  const tombol = document.querySelectorAll(".opsi");
+  const tepat = s.opsi[pilihanUser].benar;
+  tombol.forEach((b,i) => {
+    b.disabled = true;
+    b.classList.remove("dipilih");
+    if(s.opsi[i].benar) b.classList.add("benar");
+    else if(i===pilihanUser) b.classList.add("salah");
+  });
+  if(tepat) skor++;
+  catatan.push(tepat);
+  const u = $("umpan");
+  u.className = "umpan " + (tepat ? "ok" : "no");
+  u.innerHTML = `<b>${tepat ? "🎉 Tepat sekali!" : "😅 Belum tepat"}</b>${s.bahas}`;
+  u.style.display = "block";
+  $("skor").textContent = `⭐ Skor: ${skor*10}`;
+  $("btnPeriksa").classList.add("sembunyi");
+  $("btnLanjut").textContent = indeks === urutan.length-1 ? "Lihat Hasil 🏆" : "Soal Berikutnya ▶";
+  $("btnLanjut").classList.remove("sembunyi");
+};
+
+$("btnLanjut").onclick = () => {
+  indeks++;
+  if(indeks < urutan.length) muatSoal();
+  else hasil();
+};
+
+function hasil(){
+  $("isiBar").style.width = "100%";
+  const nilai = skor*10;
+  $("nilai").textContent = nilai;
+  $("hasilNama").textContent = `Nilai akhir ${namaSiswa}`;
+  $("jumlahBenar").textContent = `Kamu menjawab benar ${skor} dari ${urutan.length} soal`;
+  $("ringkas").innerHTML = catatan.map((c,i) => `<div class="bulat ${c?'b':'s'}">${i+1} ${c?'✔':'✘'}</div>`).join("");
+  let emoji, judul, pesan;
+  if(nilai >= 80){
+    emoji="🏆"; judul="Penugal Cilik Hebat!";
+    pesan="<b>Jagau:</b> Wah, kamu jeli sekali membaca tanda alam, sudah seperti para tetua kampung! <br><b>Bawi:</b> Ayo lanjut ke Pos 2, kita siapkan ladang bersama warga.";
+  } else if(nilai >= 60){
+    emoji="🌾"; judul="Bagus, Penjelajah!";
+    pesan="<b>Jagau:</b> Sebagian besar tanda alam sudah kamu kenali. <br><b>Bawi:</b> Coba baca lagi halaman Tahukah Kamu tentang bintang, rumput kalui, dan abu pembakaran supaya makin mantap.";
+  } else {
+    emoji="🌱"; judul="Ayo Coba Lagi!";
+    pesan="<b>Jagau:</b> Tidak apa apa, setiap penjelajah pernah salah langkah. <br><b>Bawi:</b> Baca ulang bagian Membaca Tanda Alam pelan pelan, lalu kerjakan kuis ini sekali lagi ya.";
+  }
+  $("hasilEmoji").textContent = emoji;
+  $("hasilJudul").textContent = judul;
+  $("pesan").innerHTML = pesan;
+  tampil("layarHasil");
+}
+
+$("btnUlang").onclick = () => mulai();
+</script>
+</body>
+</html>
